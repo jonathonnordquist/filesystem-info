@@ -1,3 +1,5 @@
+#!/usr/bin/ruby
+
 class FileSystemExplorer
   def initialize(starting_path)
     @starting_path = starting_path
