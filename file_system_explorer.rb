@@ -1,0 +1,67 @@
+class FileSystemExplorer
+  def initialize(starting_path)
+    @starting_path = starting_path
+  end
+
+  def explore_path(path = @starting_path, output = [])
+    raise(ArgumentError, 'Error: Input must be a valid directory path') unless File.directory?(path)
+
+    Dir.new(path).each do |file_name| 
+      working_path = "#{path}/#{file_name}"
+    
+      next if file_name == '.' || file_name == '..'
+        
+      if File.file?(working_path)
+        output.push({ file_name: file_name, file_path: working_path, file_size: File.size(working_path).to_s })
+      else
+        explore_path(working_path, output)
+      end
+    end
+
+    return output
+  end
+end
+
+class TableOutput
+  def initialize(col_labels, hash_array)
+    @columns = col_labels.each_with_object({}) { |(col, label), h|
+                 h[col] = { label: label, width: [hash_array.map { |g| g[col].size }.max, label.size].max } 
+               }
+    @hash_array = hash_array
+  end
+  
+  def write_table
+    write_divider
+    write_header
+    write_divider
+    @hash_array.each { |file| write_line(file) }
+    write_divider
+  end
+
+  private
+
+  def write_header
+    puts "| #{ @columns.map { |_, g| g[:label].ljust(g[:width]) }.join(' | ') } |"
+  end
+
+  def write_divider
+    puts "+-#{ @columns.map { |_, g| "-" * g[:width] }.join("-+-") }-+"
+  end
+
+  def write_line(h)
+    str = h.keys.map { |k| h[k].ljust(@columns[k][:width]) }.join(" | ")
+    puts "| #{str} |"
+  end
+end
+
+begin
+  file_system_explorer = FileSystemExplorer.new(ARGV[0])
+  path_collection = file_system_explorer.explore_path
+  sorted_collection = path_collection.sort_by { |file| file[:file_size] }
+  col_labels = { file_name: 'File Name', file_path: 'File Path', file_size: 'File Size (bytes)'  }
+
+  puts "Total files found: #{path_collection.count}"
+  TableOutput.new(col_labels, sorted_collection).write_table
+rescue ArgumentError => e
+  p e.message
+end
