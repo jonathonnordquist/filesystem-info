@@ -14,7 +14,7 @@ class FileSystemExplorer
       next if file_name == '.' || file_name == '..'
         
       if File.file?(working_path)
-        output.push({ file_name: file_name, file_path: working_path, file_size: File.size(working_path).to_s })
+        output.push({ file_name: file_name, file_path: working_path, file_size: File.size(working_path) })
       else
         explore_path(working_path, output)
       end
@@ -43,7 +43,7 @@ class TableOutput
   private
 
   def write_header
-    puts "| #{ @columns.map { |_, g| g[:label].ljust(g[:width]) }.join(' | ') } |"
+    puts "| #{ @columns.map { |_, g| g[:label].to_s.ljust(g[:width]) }.join(' | ') } |"
   end
 
   def write_divider
@@ -51,7 +51,7 @@ class TableOutput
   end
 
   def write_line(h)
-    str = h.keys.map { |k| h[k].ljust(@columns[k][:width]) }.join(" | ")
+    str = h.keys.map { |k| h[k].to_s.ljust(@columns[k][:width]) }.join(" | ")
     puts "| #{str} |"
   end
 end
@@ -63,7 +63,7 @@ begin
   col_labels = { file_name: 'File Name', file_path: 'File Path', file_size: 'File Size (bytes)'  }
 
   puts "Total files found: #{path_collection.count}"
-  TableOutput.new(col_labels, sorted_collection).write_table
+  TableOutput.new(col_labels, sorted_collection).write_table if path_collection.any?
 rescue ArgumentError => e
   p e.message
 end
