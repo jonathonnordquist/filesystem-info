@@ -59,7 +59,7 @@ end
 begin
   file_system_explorer = FileSystemExplorer.new(ARGV[0])
   path_collection = file_system_explorer.explore_path
-  sorted_collection = path_collection.sort_by { |file| file[:file_size] }
+  sorted_collection = path_collection.sort_by { |file| file[:file_size].to_i }
   col_labels = { file_name: 'File Name', file_path: 'File Path', file_size: 'File Size (bytes)'  }
 
   puts "Total files found: #{path_collection.count}"
